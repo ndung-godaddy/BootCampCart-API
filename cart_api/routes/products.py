@@ -7,6 +7,7 @@ class Product:
     def on_get(self, req, resp, product_id):
         product = DatabaseProducts.get(id=product_id)
         resp.media = model_to_dict(product)
+        print(req.media)
         resp.status = falcon.HTTP_200
 
     def on_delete(self, req, resp, product_id):
@@ -20,8 +21,29 @@ class Product:
 # POST products creates a product and returns the data it created
 
 
-class Products:
-    pass  # must have a pass line because you cannot have a "blank" class
-    # def on_get(self, req, resp):
 
-    # def on_post(self, req, resp):
+class Products:
+    #pass  # must have a pass line because you cannot have a "blank" class
+    def on_get(self, req, resp):
+        somelist = []
+        for product in DatabaseProducts.select():
+            somelist.append(model_to_dict(product))
+        resp.status = falcon.HTTP_200
+        resp.media = somelist
+
+    def on_post(self, req, resp):
+        obj = req.get_media()
+        product = DatabaseProducts(
+            name=obj["name"],
+            description=obj["description"],
+            image_url=obj["image_url"],
+            price=obj["price"],
+            is_on_sale=obj["is_on_sale"],
+            sale_price=obj["sale_price"]
+            
+        )
+
+        product.save()
+        resp.media = model_to_dict(product)
+        resp.status = falcon.HTTP_201
+        print(resp.media)
